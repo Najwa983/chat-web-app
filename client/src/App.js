@@ -1,5 +1,6 @@
 import './App.css';
 import socketClient from "socket.io-client";
+import { Chat } from './chat/Chat';
 
 const SERVER = "http://127.0.0.1:8080";
 
@@ -12,7 +13,7 @@ function App() {
 
   return (
     
-    <h1>hello</h1>
+    <Chat></Chat>
   );
 }
 
