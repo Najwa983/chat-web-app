@@ -14,8 +14,9 @@
         border: 1px solid rgb(224, 224, 224);
         margin: 10px;
         height: calc(100% - 22px);
+
+        
     }
-    
     .channel-item {
         border-bottom: 1px solid rgb(224, 224, 224);
         padding: 10px;
@@ -28,8 +29,11 @@
         }‍
         &:hover {
             background-color: rgb(224, 224, 224);
+            cursor: pointer;
         }
     }
+    
+    
     .messages-panel {
         width: calc(80% - 12px);
         border: 1px solid rgb(224, 224, 224);
@@ -40,7 +44,7 @@
         flex-direction: column;
         align-items: flex-start;
 
-        .meesages-list {
+        .messages-list {
             align-self: stretch;
             height: 100%;
         }
