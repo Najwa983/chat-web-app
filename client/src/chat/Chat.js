@@ -2,13 +2,59 @@ import React from 'react';
 import { ChannelList } from './ChannelList';
 import './chat.scss';
 import { MessagesPanel } from './MessagesPanel';
+import socketClient from "socket.io-client";
+
+const SERVER = "http://127.0.0.1:8080";
+
 export class Chat extends React.Component {
 
     state = {
-        channels: [{ id: 1, name: 'first', participants: 10 }]
+            channels: null,
+            socket: null,
+            channel:null,
     }
+    socket;
     componentDidMount() {
         this.loadChannels();
+        this.configureSocket();
+    }
+
+    
+    // The front end needs to handle these events as well. To capture the events we have to use the same event name that the back end emits and vice versa. When the client hits the channel, an event must be sent to the back end to calculate the number of participants and broadcast to all the current sockets that a new user entered the channel.
+    
+    
+    configureSocket = () => {
+        var socket = socketClient(SERVER);
+        socket.on('connection', () => {
+            if (this.state.channel) {
+                this.handleChannelSelect(this.state.channel.id);
+            }
+        });
+        socket.on('channel', channel => {
+            
+            let channels = this.state.channels;
+            channels.forEach(c => {
+                if (c.id === channel.id) {
+                    c.participants = channel.participants;
+                }
+            });
+            this.setState({ channels });
+        });
+        socket.on('message', message => {
+            
+            let channels = this.state.channels
+            channels.forEach(c => {
+                if (c.id === message.channel_id) {
+                    if (!c.messages) {
+                        c.messages = [message];
+                    } else {
+                        c.messages.push(message);
+                    }
+                }
+            });
+            this.setState({ channels });
+        });
+        this.socket = socket;
     }
 
     loadChannels = async () => {
@@ -17,19 +63,26 @@ export class Chat extends React.Component {
                 this.setState({ channels: data.channels });
             })
     }
-    // The front end needs to handle these events as well. To capture the events we have to use the same event name that the back end emits and vice versa. When the client hits the channel, an event must be sent to the back end to calculate the number of participants and broadcast to all the current sockets that a new user entered the channel.
-    handleChannelSelect = id => {
+
+    handleChannelSelect = (id) => {
+        let channel = this.state.channels.find(c => {
+            return c.id === id;
+        });
+        this.setState({ channel });
         this.socket.emit('channel-join', id, ack => {
         });
-    }    
+    }
+
+    handleSendMessage = (channel_id, text) => {
+        this.socket.emit('send-message', { channel_id, text, senderName: this.socket.id, id: Date.now() });}
 
     
     render() {
         return (
 
             <div className="chat-app">‍
-                <ChannelList channels={this.state.channels} onselectchannel={this.handleChannelSelect}></ChannelList>
-                <MessagesPanel />
+                <ChannelList channels={this.state.channels} onSelectChannel={this.handleChannelSelect}></ChannelList>
+                <MessagesPanel onSendMessage={this.handleSendMessage} channel={this.state.channel}/>
             </div>
 
 

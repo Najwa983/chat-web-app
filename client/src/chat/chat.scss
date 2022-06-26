@@ -26,13 +26,14 @@
         }‍
         span {
             font-size: 10px;
-        }‍
+        }
+
         &:hover {
             background-color: rgb(224, 224, 224);
             cursor: pointer;
         }
     }
-    
+
     
     .messages-panel {
         width: calc(80% - 12px);
